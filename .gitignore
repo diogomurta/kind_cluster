@@ -47,3 +47,4 @@ terragrunt-debug.tfvars.json
 
 # End of https://www.toptal.com/developers/gitignore/api/terraform,terragrunt
 kind-plan
+.infracost/terraform_modules
