@@ -8,6 +8,11 @@ terraform {
       source  = "gavinbunney/kubectl"
       version = ">= 1.7.0"
     }
+
+    helm = {
+      source  = "hashicorp/helm"
+      version = "2.6.0"
+    }
   }
 }
 
@@ -18,7 +23,7 @@ provider "kind" {}
 resource "kind_cluster" "default" {
   name           = "test-cluster"
   wait_for_ready = true
-  node_image     = "kindest/node:v1.20.15"
+  node_image     = "kindest/node:v1.21.12"
 
   kind_config {
     kind        = "Cluster"
@@ -62,4 +67,52 @@ data "kubectl_file_documents" "docs" {
 resource "kubectl_manifest" "ingress-controller" {
   for_each  = data.kubectl_file_documents.docs.manifests
   yaml_body = each.value
+
+  depends_on = [kind_cluster.default]
+}
+
+
+provider "helm" {
+  kubernetes {
+    host                   = kind_cluster.default.endpoint
+    cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
+    client_certificate     = kind_cluster.default.client_certificate
+    client_key             = kind_cluster.default.client_key
+  }
+}
+
+resource "helm_release" "cert-manager" {
+  name             = "cert-manager"
+  repository       = "https://charts.jetstack.io"
+  chart            = "cert-manager"
+  namespace        = "cert-manager"
+  version          = "v1.7.1"
+  create_namespace = true
+
+  depends_on = [kubectl_manifest.ingress-controller]
+
+  set {
+    name  = "installCRDs"
+    value = true
+  }
+}
+
+resource "helm_release" "rancher" {
+  name = "rancher"
+
+  repository       = "https://releases.rancher.com/server-charts/latest"
+  chart            = "rancher"
+  namespace        = "cattle-system"
+  version          = "2.6.6"
+  create_namespace = true
+
+  depends_on = [helm_release.cert-manager]
+  set {
+    name  = "hostname"
+    value = "rancher.my.org"
+  }
+  set {
+    name  = "bootstrapPassword"
+    value = "admin"
+  }
 }
