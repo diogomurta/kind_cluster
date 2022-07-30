@@ -1,8 +1,10 @@
 terraform {
+  required_version = ">= 0.13"
+
   required_providers {
     kind = {
       source  = "tehcyx/kind"
-      version = "0.0.12"
+      version = "0.0.13"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
@@ -17,8 +19,10 @@ terraform {
 }
 
 
-
 provider "kind" {}
+
+
+
 
 resource "kind_cluster" "default" {
   name           = "test-cluster"
@@ -52,6 +56,7 @@ resource "kind_cluster" "default" {
   }
 }
 
+
 provider "kubectl" {
   host                   = kind_cluster.default.endpoint
   cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
@@ -60,9 +65,11 @@ provider "kubectl" {
 }
 
 
+
 data "kubectl_file_documents" "docs" {
   content = file("ingress/ingress-ngnix.yaml")
 }
+
 
 resource "kubectl_manifest" "ingress-controller" {
   for_each  = data.kubectl_file_documents.docs.manifests
@@ -81,6 +88,8 @@ provider "helm" {
   }
 }
 
+
+
 resource "helm_release" "cert-manager" {
   name             = "cert-manager"
   repository       = "https://charts.jetstack.io"
@@ -96,6 +105,10 @@ resource "helm_release" "cert-manager" {
     value = true
   }
 }
+
+
+
+
 
 resource "helm_release" "rancher" {
   name = "rancher"
