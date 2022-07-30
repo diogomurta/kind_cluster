@@ -49,3 +49,4 @@ terragrunt-debug.tfvars.json
 kind-plan
 .infracost/terraform_modules
 test-cluster-config
+.terraform.lock.hcl
