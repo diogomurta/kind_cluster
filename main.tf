@@ -116,7 +116,7 @@ resource "helm_release" "rancher" {
   repository       = "https://releases.rancher.com/server-charts/latest"
   chart            = "rancher"
   namespace        = "cattle-system"
-  version          = "2.6.6"
+  version          = "2.6.7"
   create_namespace = true
 
   depends_on = [helm_release.cert-manager]
@@ -129,3 +129,24 @@ resource "helm_release" "rancher" {
     value = "admin"
   }
 }
+
+
+#resource "helm_release" "longhorn" {
+#  name = "longhorn"
+#
+#  repository       = "https://charts.longhorn.io"
+#  chart            = "longhorn"
+#  namespace        = "longhorn-system"
+#  version          = "1.3.1"
+#  create_namespace = true
+
+#  depends_on = [helm_release.rancher]
+#  set {
+#    name  = "ingressEnable"
+#    value = "true"
+#  }
+#  set {
+#    name  = "ingressHost"
+#    value = "longhorn.my.org"
+#  }
+#}
