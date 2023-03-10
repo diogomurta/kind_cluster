@@ -15,13 +15,29 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.6.0"
     }
+    local = {
+      source = "hashicorp/local"
+      version = "2.4.0"
+    }
+  }
+}
+
+provider "local" {
+
+}
+
+resource "local_file" "hosts_file" {
+  content  = "127.0.0.1 rancher.my.org\n"
+  filename = "/etc/hosts"
+  provisioner "file" {
+    content     = local_file.hosts_file.content
+    destination = local_file.hosts_file.filename
   }
 }
 
 
+
 provider "kind" {}
-
-
 
 
 resource "kind_cluster" "default" {
