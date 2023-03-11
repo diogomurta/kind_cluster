@@ -15,25 +15,10 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.6.0"
     }
-    local = {
-      source = "hashicorp/local"
-      version = "2.4.0"
-    }
+
   }
 }
 
-provider "local" {
-
-}
-
-resource "local_file" "hosts_file" {
-  content  = "127.0.0.1 rancher.my.org\n"
-  filename = "/etc/hosts"
-  provisioner "file" {
-    content     = local_file.hosts_file.content
-    destination = local_file.hosts_file.filename
-  }
-}
 
 
 
@@ -43,7 +28,7 @@ provider "kind" {}
 resource "kind_cluster" "default" {
   name           = "test-cluster"
   wait_for_ready = true
-  node_image     = "kindest/node:v1.21.12"
+  node_image     = "kindest/node:v1.24.7@sha256:577c630ce8e509131eab1aea12c022190978dd2f745aac5eb1fe65c0807eb315"
 
   kind_config {
     kind        = "Cluster"
@@ -132,7 +117,7 @@ resource "helm_release" "rancher" {
   repository       = "https://releases.rancher.com/server-charts/latest"
   chart            = "rancher"
   namespace        = "cattle-system"
-  version          = "2.6.7"
+  version          = "2.7.1"
   create_namespace = true
 
   depends_on = [helm_release.cert-manager]
